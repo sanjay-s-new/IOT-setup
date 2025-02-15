@@ -1,0 +1,4 @@
+{
+  "roleArn": "arn:aws:iam::626635402177:role/MyIotCdkStack-IoTLambdaFunctionServiceRoleBB3A5E35-Udz5ZvmSlShB",
+  "logLevel": "DEBUG"
+}

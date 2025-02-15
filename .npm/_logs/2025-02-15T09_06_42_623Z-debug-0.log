@@ -1,0 +1,76 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@9.2.0
+2 info using node@v18.19.1
+3 timing npm:load:whichnode Completed in 0ms
+4 timing config:load:defaults Completed in 3ms
+5 timing config:load:file:/usr/share/nodejs/npm/npmrc Completed in 4ms
+6 timing config:load:builtin Completed in 4ms
+7 timing config:load:cli Completed in 6ms
+8 timing config:load:env Completed in 0ms
+9 timing config:load:project Completed in 3ms
+10 timing config:load:file:/root/.npmrc Completed in 0ms
+11 timing config:load:user Completed in 0ms
+12 timing config:load:file:/etc/npmrc Completed in 0ms
+13 timing config:load:global Completed in 0ms
+14 timing config:load:setEnvs Completed in 0ms
+15 timing config:load Completed in 19ms
+16 timing npm:load:configload Completed in 19ms
+17 timing npm:load:mkdirpcache Completed in 0ms
+18 timing npm:load:mkdirplogs Completed in 1ms
+19 verbose title npm install aws-cdk
+20 verbose argv "install" "--global" "aws-cdk"
+21 timing npm:load:setTitle Completed in 2ms
+22 timing config:load:flatten Completed in 4ms
+23 timing npm:load:display Completed in 9ms
+24 verbose logfile logs-max:10 dir:/root/.npm/_logs/2025-02-15T09_06_42_623Z-
+25 verbose logfile /root/.npm/_logs/2025-02-15T09_06_42_623Z-debug-0.log
+26 timing npm:load:logFile Completed in 9ms
+27 timing npm:load:timers Completed in 0ms
+28 timing npm:load:configScope Completed in 0ms
+29 timing npm:load Completed in 40ms
+30 timing config:load:flatten Completed in 1ms
+31 timing arborist:ctor Completed in 1ms
+32 silly logfile done cleaning log files
+33 timing idealTree:init Completed in 14ms
+34 timing idealTree:userRequests Completed in 4ms
+35 silly idealTree buildDeps
+36 silly fetch manifest aws-cdk@*
+37 http fetch GET 200 https://registry.npmjs.org/aws-cdk 181ms (cache miss)
+38 silly placeDep ROOT aws-cdk@2.178.2 OK for:  want: *
+39 silly fetch manifest fsevents@2.3.2
+40 http fetch GET 200 https://registry.npmjs.org/fsevents 37ms (cache miss)
+41 timing idealTree:#root Completed in 251ms
+42 silly placeDep node_modules/aws-cdk fsevents@2.3.2 OK for: aws-cdk@2.178.2 want: 2.3.2
+43 timing idealTree:node_modules/aws-cdk Completed in 9ms
+44 timing idealTree:node_modules/aws-cdk/node_modules/fsevents Completed in 0ms
+45 timing idealTree:buildDeps Completed in 261ms
+46 timing idealTree:fixDepFlags Completed in 2ms
+47 timing idealTree Completed in 283ms
+48 timing reify:loadTrees Completed in 285ms
+49 timing reify:diffTrees Completed in 2ms
+50 silly reify moves {}
+51 timing reify:retireShallow Completed in 1ms
+52 timing reify:createSparse Completed in 40ms
+53 timing reify:loadBundles Completed in 0ms
+54 verbose reify failed optional dependency /usr/local/lib/node_modules/aws-cdk/node_modules/fsevents
+55 silly reify mark deleted [ '/usr/local/lib/node_modules/aws-cdk/node_modules/fsevents' ]
+56 timing reifyNode:node_modules/aws-cdk/node_modules/fsevents Completed in 8ms
+57 silly tarball no local data for aws-cdk@https://registry.npmjs.org/aws-cdk/-/aws-cdk-2.178.2.tgz. Extracting by manifest.
+58 http fetch GET 200 https://registry.npmjs.org/aws-cdk/-/aws-cdk-2.178.2.tgz 1334ms (cache miss)
+59 timing reifyNode:node_modules/aws-cdk Completed in 1358ms
+60 timing reify:unpack Completed in 1358ms
+61 timing reify:unretire Completed in 0ms
+62 timing build:queue Completed in 2ms
+63 timing build:link:node_modules/aws-cdk Completed in 3ms
+64 timing build:link Completed in 3ms
+65 timing build:deps Completed in 6ms
+66 timing build Completed in 6ms
+67 timing reify:build Completed in 8ms
+68 timing reify:trash Completed in 2ms
+69 timing reify Completed in 1714ms
+70 silly ADD node_modules/aws-cdk
+71 silly ADD
+72 timing command:install Completed in 1723ms
+73 verbose exit 0
+74 timing npm Completed in 1780ms
+75 info ok
