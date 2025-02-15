@@ -1,5 +1,5 @@
 {
-  "app": "mvn exec:java -Dexec.mainClass=com.myorg.MyIotCdkApp",
+  "app": ""app": "mvn -e -q compile exec:java -Dexec.mainClass=com.myorg.MyIotCdkApp",
   "watch": {
     "include": [
       "**"
