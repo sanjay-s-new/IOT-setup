@@ -34,18 +34,14 @@ jobs:
       - name: Deploy AWS IoT Rule
         run: |
           if aws iot describe-topic-rule --rule-name "MyIoTRule" --region ap-south-1; then
-            echo "IoT Rule already exists, updating..."
-            aws iot replace-topic-rule \
-              --rule-name "MyIoTRule" \
-              --cli-input-json file://iot-rule.json \
-              --region ap-south-1
-          else
-            echo "Creating IoT Rule..."
-            aws iot create-topic-rule \
-              --rule-name "MyIoTRule" \
-              --cli-input-json file://iot-rule.json \
-              --region ap-south-1
+            echo "Deleting existing IoT Rule..."
+            aws iot delete-topic-rule --rule-name "MyIoTRule" --region ap-south-1
           fi
+          echo "Creating new IoT Rule..."
+          aws iot create-topic-rule \
+            --rule-name "MyIoTRule" \
+            --cli-input-json file://iot-rule.json \
+            --region ap-south-1
 
       - name: Deploy AWS Lambda Function
         run: |
