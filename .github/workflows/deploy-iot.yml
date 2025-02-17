@@ -62,6 +62,6 @@ jobs:
       - name: Verify CloudWatch Logs
         run: |
           aws logs describe-log-groups --log-group-name-prefix "/aws/iot" --region ap-south-1
-Q!
+
 
 
