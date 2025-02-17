@@ -9,16 +9,13 @@ on:
       - main
 
 permissions:
-  id-token: write  # Required for OIDC authentication
-  contents: read   # Allows reading repo contents
+  id-token: write  # ✅ Required for OIDC authentication
+  contents: read   # ✅ Allows reading repo contents
 
 jobs:
   deploy:
     name: Deploy AWS IoT Setup
     runs-on: ubuntu-latest
-
-    env:
-      ACTIONS_STEP_DEBUG: true  # Enable debug logs for GitHub Actions
 
     steps:
       - name: Checkout repository
@@ -26,8 +23,12 @@ jobs:
 
       - name: Debug GitHub OIDC Token
         run: |
-          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN=$ACTIONS_ID_TOKEN_REQUEST_TOKEN"
-          echo "ACTIONS_ID_TOKEN_REQUEST_URL=$ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "Requesting OIDC Token..."
+          curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+               "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com"
+        env:
+          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_URL }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -36,53 +37,6 @@ jobs:
           role-session-name: GitHubActions
           aws-region: ap-south-1
 
-      - name: Verify AWS identity
+      - name: Verify AWS authentication
         run: aws sts get-caller-identity
-
-      - name: Deploy AWS IoT Rule
-        run: |
-          if aws iot describe-topic-rule --rule-name "MyIoTRule" --region ap-south-1; then
-            echo "Deleting existing IoT Rule..."
-            aws iot delete-topic-rule --rule-name "MyIoTRule" --region ap-south-1
-          fi
-          echo "Creating new IoT Rule..."
-          aws iot create-topic-rule \
-            --rule-name "MyIoTRule" \
-            --cli-input-json file://iot-rule.json \
-            --region ap-south-1
-
-      - name: Deploy AWS Lambda Function
-        run: |
-          if [ -f lambda/index.js ]; then
-            echo "Zipping Lambda function..."
-            zip function.zip lambda/index.js
-            aws lambda update-function-code \
-              --function-name MyIotCdkStack-IoTLambdaFunctionD2C5DBD1-ZhDBaY89rI78 \
-              --zip-file fileb://function.zip \
-              --region ap-south-1
-          else
-            echo "❌ Lambda function file not found!"
-            exit 1
-          fi
-
-      - name: Set AWS IoT Logging Options
-        run: |
-          cat <<EOF > iot-logging.json
-          {
-            "roleArn": "arn:aws:iam::626635402177:role/MyIotCdkStack-IoTLambdaFunctionServiceRoleBB3A5E35-Udz5ZvmSlShB",
-            "logLevel": "DEBUG"
-          }
-          EOF
-          aws iot set-logging-options --logging-options file://iot-logging.json --region ap-south-1 || echo "Logging already configured"
-
-      - name: Publish Test IoT Message
-        run: |
-          aws iot-data publish \
-            --topic "telemetry/data" \
-            --payload "$(echo '{"temperature": 25}' | base64)" \
-            --region ap-south-1
-
-      - name: Verify CloudWatch Logs
-        run: |
-          aws logs describe-log-groups --log-group-name-prefix "/aws/iot" --region ap-south-1
 
