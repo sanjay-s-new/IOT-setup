@@ -9,26 +9,37 @@ on:
       - main
 
 permissions:
-  contents: read  # Allows reading repo contents
+  id-token: write  # If you are using OIDC, keep this line
+  contents: read   # Allows reading repo contents
 
 jobs:
   deploy:
-    name: Deploy AWS IoT Setup
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      # Step 2: Debug AWS credentials (ensure they are set correctly)
+      - name: Debug AWS credentials
+        run: |
+          echo "AWS Access Key ID: $AWS_ACCESS_KEY_ID"
+          echo "AWS Secret Access Key: $AWS_SECRET_ACCESS_KEY"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Step 3: Set up AWS credentials
+      - name: Set up AWS credentials
         run: |
           echo "Setting up AWS credentials..."
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region ap-south-1
+          aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+          aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+          aws configure set default.region ap-south-1
+          aws configure list
 
-    
-
+      # Step 4: Deploy AWS IoT Rule
       - name: Deploy AWS IoT Rule
         run: |
           if aws iot describe-topic-rule --rule-name "MyIoTRule" --region ap-south-1; then
@@ -41,6 +52,7 @@ jobs:
             --cli-input-json file://iot-rule.json \
             --region ap-south-1
 
+      # Step 5: Deploy AWS Lambda Function
       - name: Deploy AWS Lambda Function
         run: |
           if [ -f lambda/index.js ]; then
@@ -55,6 +67,7 @@ jobs:
             exit 1
           fi
 
+      # Step 6: Set AWS IoT Logging Options
       - name: Set AWS IoT Logging Options
         run: |
           cat <<EOF > iot-logging.json
@@ -65,6 +78,7 @@ jobs:
           EOF
           aws iot set-logging-options --logging-options file://iot-logging.json --region ap-south-1 || echo "Logging already configured"
 
+      # Step 7: Publish Test IoT Message
       - name: Publish Test IoT Message
         run: |
           aws iot-data publish \
@@ -72,6 +86,7 @@ jobs:
             --payload "$(echo '{"temperature": 25}' | base64)" \
             --region ap-south-1
 
+      # Step 8: Verify CloudWatch Logs
       - name: Verify CloudWatch Logs
         run: |
           aws logs describe-log-groups --log-group-name-prefix "/aws/iot" --region ap-south-1
