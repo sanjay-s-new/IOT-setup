@@ -9,7 +9,7 @@ on:
       - main
 
 permissions:
-  contents: read   # Allows reading repo contents
+  contents: read  # Allows reading repo contents
 
 jobs:
   deploy:
@@ -21,13 +21,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ap-south-1
-        run: echo "✅ AWS credentials configured"
+        run: |
+          echo "Setting up AWS credentials..."
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ap-south-1
 
-      - name: Verify AWS authentication
+      - name: Verify AWS identity
         run: aws sts get-caller-identity
 
       - name: Deploy AWS IoT Rule
