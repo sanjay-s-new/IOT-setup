@@ -1,10 +1,9 @@
 name: Deploy to AWS
 
 on:
-  # Trigger the workflow when code is pushed to the 'master' branch
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -46,22 +45,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
-      # Step 6: Install dependencies (Java and Node)
+      # Step 6: Install Java dependencies (maven)
       - name: Install Java dependencies
         run: mvn clean install
-      - name: Install Java dependencies
-        run: mvn package
 
+      # Step 7: Install Node.js dependencies (npm)
       - name: Install Node.js dependencies
         run: npm install
 
-      # Step 7: Install AWS CDK CLI and verify installation
+      # Step 8: Set up AWS credentials
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1  # Adjust to your region
+
+      # Step 9: Install AWS CDK CLI and verify installation
       - name: Install AWS CDK CLI
         run: |
           npm install -g aws-cdk
           which cdk  # Check if cdk is installed
           cdk --version  # Check CDK version to ensure it's installed
 
-      # Step 8: Deploy using AWS CDK
+      # Step 10: Deploy using AWS CDK
       - name: Deploy with CDK
         run: cdk deploy --require-approval never
+
