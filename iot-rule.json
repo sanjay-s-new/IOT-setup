@@ -1,0 +1,16 @@
+{
+  "ruleName": "MyIoTRule",
+  "topicRulePayload": {
+    "sql": "SELECT * FROM 'telemetry/data'",
+    "actions": [
+      {
+        "lambda": {
+          "functionArn": "arn:aws:lambda:ap-south-1:626635402177:function:MyIotLambdaFunction"
+        }
+      }
+    ],
+    "awsIotSqlVersion": "2015-10-08",
+    "ruleDisabled": false
+  }
+}
+
