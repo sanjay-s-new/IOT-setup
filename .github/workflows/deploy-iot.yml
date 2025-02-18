@@ -1,6 +1,7 @@
 name: Deploy to AWS
 
 on:
+  # Trigger the workflow when code is pushed to the 'master' branch
   push:
     branches:
       - main
@@ -14,49 +15,56 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up JDK 11 (Java is required for CDK)
+      # Step 2: Set up AWS credentials (use secrets to securely pass credentials)
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1  # Specify your AWS region here
+
+      # Step 3: Set up JDK 11 (Java is required for CDK)
       - name: Set up JDK 11
         uses: actions/setup-java@v2
         with:
           java-version: '11'
           distribution: 'temurin'
 
-      # Step 3: Set up Node.js (AWS CDK uses Node.js)
+      # Step 4: Set up Node.js (AWS CDK uses Node.js)
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '16'
 
-      # Step 4: Set up AWS credentials
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      # Step 5: Cache Maven dependencies
+      - name: Cache Maven dependencies
+        uses: actions/cache@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
-        env:
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }} # Set your AWS Account ID here
-          
-      # Step 5: Install Java dependencies
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Step 6: Cache Node.js dependencies
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Step 7: Install dependencies (Java and Node)
       - name: Install Java dependencies
         run: mvn clean install
 
-      # Step 6: Install Node.js dependencies
       - name: Install Node.js dependencies
         run: npm install
 
-      # Step 7: Install AWS CDK CLI
-      - name: Install AWS CDK CLI
-        run: |
-          npm install -g aws-cdk
-          which cdk  # Check if cdk is installed
-          cdk --version  # Check CDK version to ensure it's installed
-
-      # Step 8: Verify AWS credentials by running sts get-caller-identity
-      - name: Verify AWS credentials
-        run: aws sts get-caller-identity
+      # Step 8: Install AWS CDK CLI
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
 
       # Step 9: Deploy using AWS CDK
       - name: Deploy with CDK
         run: cdk deploy --require-approval never
-
