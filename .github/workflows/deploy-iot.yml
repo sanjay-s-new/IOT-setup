@@ -22,11 +22,10 @@ jobs:
 
       - name: Configure AWS credentials
         env:
-          AWS_ACCESS_KEY_ID: ${{ AKIAZDZTBNPA2C2KDV5U }}
-          AWS_SECRET_ACCESS_KEY: ${{ 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 }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-south-1
-        run: |
-          echo "✅ AWS credentials configured"
+        run: echo "✅ AWS credentials configured"
 
       - name: Verify AWS authentication
         run: aws sts get-caller-identity
