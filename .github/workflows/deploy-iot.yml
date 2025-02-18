@@ -1,82 +1,60 @@
-name: AWS IoT Deployment
+name: Deploy to AWS
 
 on:
+  # Trigger the workflow when code is pushed to the 'master' branch
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-permissions:
-  id-token: write  # Required for OIDC authentication
-  contents: read   # Allows reading repo contents
+      - master
 
 jobs:
   deploy:
-    name: Deploy AWS IoT Setup
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # Step 1: Checkout code from GitHub
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set up AWS credentials
-        run: |
-          echo "Setting up AWS credentials..."
-          aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-          aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-          aws configure set aws_session_token "$AWS_SESSION_TOKEN"  # Add session token if using temporary credentials
-          aws configure set default.region ap-south-1
-          aws configure list
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # Add the session token if using temporary credentials
+      # Step 2: Set up JDK 11 (Java is required for CDK)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'  # Corrected to temurin
 
-      - name: Test AWS credentials
-        run: aws sts get-caller-identity  # Verify the credentials
+      # Step 3: Set up Node.js (AWS CDK uses Node.js)
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
 
-      - name: Create new IoT Rule
-        run: |
-          echo "Creating new IoT Rule..."
-          aws iot create-topic-rule \
-            --rule-name "MyIoTRule" \
-            --cli-input-json file://iot-rule.json \
-            --region ap-south-1
+      # Step 4: Cache Maven dependencies
+      - name: Cache Maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: Deploy AWS Lambda Function
-        run: |
-          if [ -f lambda/index.js ]; then
-            echo "Zipping Lambda function..."
-            zip function.zip lambda/index.js
-            aws lambda update-function-code \
-              --function-name MyIotCdkStack-IoTLambdaFunctionD2C5DBD1-ZhDBaY89rI78 \
-              --zip-file fileb://function.zip \
-              --region ap-south-1
-          else
-            echo "❌ Lambda function file not found!"
-            exit 1
-          fi
+      # Step 5: Cache Node.js dependencies
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
-      - name: Set AWS IoT Logging Options
-        run: |
-          cat <<EOF > iot-logging.json
-          {
-            "roleArn": "arn:aws:iam::626635402177:role/MyIotCdkStack-IoTLambdaFunctionServiceRoleBB3A5E35-Udz5ZvmSlShB",
-            "logLevel": "DEBUG"
-          }
-          EOF
-          aws iot set-logging-options --logging-options file://iot-logging.json --region ap-south-1 || echo "Logging already configured"
+      # Step 6: Install dependencies (Java and Node)
+      - name: Install Java dependencies
+        run: mvn clean install
+      - name: Install Java dependencies
+        run: mvn package
 
-      - name: Publish Test IoT Message
-        run: |
-          aws iot-data publish \
-            --topic "telemetry/data" \
-            --payload "$(echo '{"temperature": 25}' | base64)" \
-            --region ap-south-1
+      - name: Install Node.js dependencies
+        run: npm install
 
-      - name: Verify CloudWatch Logs
-        run: |
-          aws logs describe-log-groups --log-group-name-prefix "/aws/iot" --region ap-south-1
-
+      # Step 7: Deploy using AWS CDK
+      - name: Deploy with CDK
+        run: cdk deploy --require-approval never
