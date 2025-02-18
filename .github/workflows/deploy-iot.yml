@@ -35,7 +35,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
         env:
-          AWS_ACCOUNT_ID: ${{ secrets.626635402177 }} # Set your AWS Account ID here
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }} # Set your AWS Account ID here
           
       # Step 5: Install Java dependencies
       - name: Install Java dependencies
