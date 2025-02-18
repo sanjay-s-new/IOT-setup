@@ -4,7 +4,7 @@ on:
   # Trigger the workflow when code is pushed to the 'master' branch
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
