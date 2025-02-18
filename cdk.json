@@ -13,6 +13,8 @@
     ]
   },
   "context": {
+    "aws:cdk:default-account": "626635402177",
+    "aws:cdk:default-region": "ap-south-1",
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/core:target-partitions": [
