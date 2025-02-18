@@ -9,8 +9,7 @@ on:
       - main
 
 permissions:
-  id-token: write  # Required for OIDC authentication
-  contents: read   # Allows reading repo contents
+  contents: read  # Allows reading repo contents
 
 jobs:
   deploy:
@@ -21,19 +20,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up AWS credentials
+      - name: Configure AWS credentials
         run: |
-          echo "Configuring AWS credentials..."
-          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
-          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          aws configure set default.region ap-south-1
-          aws configure list
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          echo "Setting up AWS credentials..."
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ap-south-1
 
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
+    
 
       - name: Deploy AWS IoT Rule
         run: |
