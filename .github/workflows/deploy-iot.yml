@@ -55,6 +55,13 @@ jobs:
       - name: Install Node.js dependencies
         run: npm install
 
-      # Step 7: Deploy using AWS CDK
+      # Step 7: Install AWS CDK CLI and verify installation
+      - name: Install AWS CDK CLI
+        run: |
+          npm install -g aws-cdk
+          which cdk  # Check if cdk is installed
+          cdk --version  # Check CDK version to ensure it's installed
+
+      # Step 8: Deploy using AWS CDK
       - name: Deploy with CDK
         run: cdk deploy --require-approval never
